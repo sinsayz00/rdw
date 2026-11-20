@@ -13,7 +13,6 @@ ul{padding-left:1.2em}
 .stage{position:relative;width:1920px;height:1080px;flex:none;transform-origin:center center}
 .slide{box-sizing:border-box;position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;display:none}
 .slide:not(.active){display:none!important}
-.slide aside{display:none}
 
 /* 아래 조작 막대 */
 .controls{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;
@@ -24,13 +23,10 @@ body:hover .controls,.controls:focus-within{opacity:1}
 .controls button:hover,.controls button:focus-visible{background:rgba(255,255,255,.15);outline:none}
 #counter{min-width:64px;text-align:center}
 
-/* 발표자 노트 */
-.notes{position:fixed;right:16px;top:16px;width:min(420px,40vw);max-height:60vh;overflow:auto;padding:16px 20px;
-  background:#FAFAF8;color:#2A2A2A;border-radius:8px;font:16px/1.6 "Arita Dotum",Arial,sans-serif;box-shadow:0 4px 20px rgba(0,0,0,.3)}
 
 @media print{
   html,body{background:none;overflow:visible;height:auto}
-  .controls,.notes{display:none}
+  .controls{display:none}
   .viewport{position:static;display:block}
   .stage{transform:none!important;width:auto;height:auto}
   .slide{position:relative;display:flex!important;break-after:page}
