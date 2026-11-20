@@ -3,7 +3,6 @@
   const stage = document.getElementById('stage');
   const slides = Array.from(stage.querySelectorAll('.slide'));
   const counter = document.getElementById('counter');
-  const notes = document.getElementById('notes');
   let current = 0;
 
   // 창 크기에 맞춰 1920×1080 무대 축소·확대
@@ -16,8 +15,6 @@
     current = Math.max(0, Math.min(slides.length - 1, i));
     slides.forEach((el, n) => el.classList.toggle('active', n === current));
     counter.textContent = (current + 1) + ' / ' + slides.length;
-    const aside = slides[current].querySelector('aside');
-    notes.textContent = aside ? aside.textContent.trim() : '(노트 없음)';
     if (location.hash !== '#' + (current + 1)) history.replaceState(null, '', '#' + (current + 1));
   }
 
@@ -26,25 +23,39 @@
     return Number.isFinite(n) ? n - 1 : 0;
   }
 
-  function toggleNotes() { notes.hidden = !notes.hidden; }
+  // 전체 화면: 브라우저마다 다른 이름(webkit)까지 처리
+  const root = document.documentElement;
+  const canFullscreen = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+  function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
   function toggleFullscreen() {
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
-    else document.exitFullscreen();
+    if (!canFullscreen) return;
+    if (!isFullscreen()) {
+      const req = root.requestFullscreen || root.webkitRequestFullscreen;
+      const r = req.call(root);
+      if (r && r.catch) r.catch(() => {});
+    } else {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) exit.call(document);
+    }
   }
+  document.addEventListener('fullscreenchange', fit);
+  document.addEventListener('webkitfullscreenchange', fit);
 
-  document.getElementById('prev').addEventListener('click', () => show(current - 1));
-  document.getElementById('next').addEventListener('click', () => show(current + 1));
-  document.getElementById('notesBtn').addEventListener('click', toggleNotes);
-  document.getElementById('fsBtn').addEventListener('click', toggleFullscreen);
+  // 버튼을 누른 뒤 포커스를 바로 풀어서, Space 키가 버튼을 다시 누르지 않게 함
+  function onClick(id, fn) {
+    document.getElementById(id).addEventListener('click', (e) => { fn(); e.currentTarget.blur(); });
+  }
+  onClick('prev', () => show(current - 1));
+  onClick('next', () => show(current + 1));
+  onClick('fsBtn', toggleFullscreen);
+  if (!canFullscreen) document.getElementById('fsBtn').hidden = true;
 
   document.addEventListener('keydown', (e) => {
-    if (e.target.closest && e.target.closest('button') && (e.key === ' ' || e.key === 'Enter')) return;
     switch (e.key) {
       case 'ArrowRight': case 'PageDown': case ' ': show(current + 1); e.preventDefault(); break;
       case 'ArrowLeft': case 'PageUp': show(current - 1); e.preventDefault(); break;
       case 'Home': show(0); break;
       case 'End': show(slides.length - 1); break;
-      case 'n': case 'N': toggleNotes(); break;
       case 'f': case 'F': toggleFullscreen(); break;
     }
   });
